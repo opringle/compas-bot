@@ -10,9 +10,9 @@
 1. [Install the latest version of node.js](https://nodejs.org/en/)
 2. [Setup, install & authorize ngrok](https://dashboard.ngrok.com/get-started)
 3. From the root directory of this repo, install required node modules: `$ npm install`
-4. Start the node application as a local server: `$ blah`
-5. Point ngrok to where your server is running: `$ ./ngrok http 3000`
-6. In Dialogflow Fullfillment, change the URL to the ngrok forwarding address
+4. Deploy functions locally using google cloud functions emulator: `$ functions start && functions deploy CompasCard --trigger-http`
+5. Point ngrok to where your functions are running: `$ ~/ngrok http 8010`
+6. In Dialogflow Fullfillment, set the URL: `<ngrok forwarding address>/compascard-cbc5b/us-central1/CompasCard`
 7. You can now send messages in dialogflow, which will trigger your local fullfillments code
 
 ### On Google Cloud Platform
@@ -26,8 +26,12 @@ Hosting and deployment is setup with a google cloud project.
 ### ToDo
  
 - [x] Call a fake API with card and amount to upload with, respond to user
+- [x] Get running locally with ngrok
+- [x] agent.handleRequest() only takes intent handlers, not action handlers
 - [ ] Call fake API to log user in, loading their attributes into dialogflow entities
+    - Login intent expects entities to be filled with slot filling via the webhook
+    - Reference card parameters from previous contexts in the followup response (please choose from your cards X, Y and Z)
+    - 
 - [ ] Reference user entities when loading card to verify card exists and there is a payment method
 - [ ] Bulk out with more definitions and smalltalk
 - [ ] Arrange meeting with translink
-- [ ] Get running locally with ngrok

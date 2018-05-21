@@ -9,9 +9,7 @@
 // https://github.com/dialogflow/dialogflow-fulfillment-nodejs/blob/master/docs/Card.md
 const { WebhookClient } = require('dialogflow-fulfillment');
 const { Card, Suggestion } = require('dialogflow-fulfillment');
-const compass = require('./compass_modules/api_functions')
-
-
+const compass_api = require('./compass_modules/compass_api');
 
 process.env.DEBUG = 'dialogflow:debug'; // enables lib debugging statements
 
@@ -20,17 +18,17 @@ exports.CompasCard = (request, response) => {
   // Create a webhookclient class
   const agent = new WebhookClient({ request, response });
 
-  // Add dialogflow logs
+  // Log the incoming request from Dialogflow
   console.log('Dialogflow Request headers: ' + JSON.stringify(request.headers));
   console.log('Dialogflow Request body: ' + JSON.stringify(request.body));
 
+  // Call CompasCard's API to load funds for the user
   function load_value(agent) {
-    // Call CompasCard's API to load funds for the user
 
     // Get the amount and card we wish to load funds to from the previous context
     const parameters = agent.getContext('confirm_add_funds')['parameters'];
     const amount = parameters['amount'];
-    const card = parameters['card_name'];
+    const card = parameters['card'];
 
     // Call Translink API to execute the transaction
 
@@ -39,6 +37,9 @@ exports.CompasCard = (request, response) => {
   }
 
   function log_in(agent) {
+
+    // Reply to the user
+    agent.add(`Welcome! You have been successfully logged in!`);
 
     // Call CompasCard's API to log in the user and retrieve required information for the conversation
     const user_info = compass.login("ojapringle@gmail.com", "myfakepassword");
@@ -62,9 +63,6 @@ exports.CompasCard = (request, response) => {
         console.log('BODY: ' + chunk);
       });
     }).end();
-
-    // Reply to the user
-    agent.add(`Welcome ${user_info['Contact information']['Name']}. You have been successfully logged in!`);
   }
 
 
@@ -105,14 +103,14 @@ exports.CompasCard = (request, response) => {
   //   agent.add(conv); // Add Actions on Google library responses to your agent's response
   // }
 
-  // Run the proper function handler based on the Dialogflow action name
-  let actionMap = new Map();
+  // Run the proper function handler based on the Dialogflow itnent name
+  let intentMap = new Map();
   // actionMap.set('Default Welcome Intent', welcome);
   // actionMap.set('Default Fallback Intent', fallback);
-  actionMap.set('load_card', load_value);
-  actionMap.set('login', log_in);
+  intentMap.set('Load Stored Value - yes', load_value);
+  intentMap.set('Log User In', log_in);
   //actionMap.set('Load Stored Value - yes', load_value);
   // actionMap.set('check_card', check_cards);
   // intentMap.set('<INTENT_NAME_HERE>', googleAssistantHandler);
-  agent.handleRequest(actionMap);
+  agent.handleRequest(intentMap);
 };
