@@ -1,77 +1,84 @@
-// Copyright 2017, Google, Inc.
-// Licensed under the Apache License, Version 2.0 (the 'License');
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//    http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an 'AS IS' BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// Dialogflow Node.js fulfillment getting started guide:
+// https://github.com/dialogflow/dialogflow-fulfillment-nodejs#quick-start
 
 'use strict';
 
-const http = require('http');
+// Load webhookclient class:
+// https://github.com/dialogflow/dialogflow-fulfillment-nodejs/blob/master/docs/WebhookClient.md
+const { WebhookClient } = require('dialogflow-fulfillment');
 
-const host = 'api.worldweatheronline.com';
-const wwoApiKey = 'e8fe2d11565b48b8930220952181905';
+// Load Card and Suggestion class:
+// https://github.com/dialogflow/dialogflow-fulfillment-nodejs/blob/master/docs/Card.md
+const { Card, Suggestion } = require('dialogflow-fulfillment');
 
-exports.dialogflowWeatherWebhook = (req, res) => {
-  // Get the city and date from the request
-  let city = req.body.queryResult.parameters['geo-city']; // city is a required param
+process.env.DEBUG = 'dialogflow:debug'; // enables lib debugging statements
 
-  // Get the date for the weather forecast (if present)
-  let date = '';
-  if (req.body.queryResult.parameters['date']) {
-    date = req.body.queryResult.parameters['date'];
-    console.log('Date: ' + date);
+exports.CompasCard = (request, response) => {
+
+  // Create a webhookclient class
+  const agent = new WebhookClient({ request, response });
+  console.log('Dialogflow Request headers: ' + JSON.stringify(request.headers));
+  console.log('Dialogflow Request body: ' + JSON.stringify(request.body));
+
+  function load_value(agent) {
+    // Call CompasCard's API to load funds for the user
+
+    // Get the amount and card we wish to load funds to from the previous context
+    const parameters = agent.getContext('confirm_add_funds')['parameters'];
+    const amount = parameters['amount'];
+    const card = parameters['card_name'];
+
+    // Call Translink API to execute the transaction
+
+    // Reply to the user
+    agent.add(amount + ` CAD has been added to card "` + card + `".`);
   }
 
-  // Call the weather API
-  callWeatherApi(city, date).then((output) => {
-    res.json({ 'fulfillmentText': output }); // Return the results of the weather API to Dialogflow
-  }).catch(() => {
-    res.json({ 'fulfillmentText': `I don't know the weather but I hope it's good!` });
-  });
-};
 
-function callWeatherApi (city, date) {
-  return new Promise((resolve, reject) => {
-    // Create the path for the HTTP request to get the weather
-    let path = '/premium/v1/weather.ashx?format=json&num_of_days=1' +
-      '&q=' + encodeURIComponent(city) + '&key=' + wwoApiKey + '&date=' + date;
-    console.log('API Request: ' + host + path);
+  // function welcome(agent) {
+  //   agent.add(`Welcome to my agent!`);
+  // }
 
-    // Make the HTTP request to get the weather
-    http.get({host: host, path: path}, (res) => {
-      let body = ''; // var to store the response chunks
-      res.on('data', (d) => { body += d; }); // store each response chunk
-      res.on('end', () => {
-        // After all the data has been received parse the JSON for desired data
-        let response = JSON.parse(body);
-        let forecast = response['data']['weather'][0];
-        let location = response['data']['request'][0];
-        let conditions = response['data']['current_condition'][0];
-        let currentConditions = conditions['weatherDesc'][0]['value'];
+  // function load_existing_cards(agent) {
+  //   // Retrieve users card names from compas API and load them into Dialogflow user entity
 
-        // Create response
-        let output = `Current conditions in the ${location['type']} 
-        ${location['query']} are ${currentConditions} with a projected high of
-        ${forecast['maxtempC']}°C or ${forecast['maxtempF']}°F and a low of 
-        ${forecast['mintempC']}°C or ${forecast['mintempF']}°F on 
-        ${forecast['date']}.`;
+  //   // Get the users cards from compas API
+  //   const cards = ['oliver', 'steven'];
 
-        // Resolve the promise with the output text
-        console.log(output);
-        resolve(output);
-      });
-      res.on('error', (error) => {
-        console.log(`Error calling the weather API: ${error}`)
-        reject();
-      });
-    });
-  });
-}
+  //   // Upload them to the user entity in Dialogflow
     
+
+  //   // Reply with this message
+  //   agent.add(amount + ` CAD has been added to card "` + card + `".`);
+  //   // agent.add(new Card({
+  //   //     title: `Title: this is a card title`,
+  //   //     imageUrl: 'https://dialogflow.com/images/api_home_laptop.svg',
+  //   //     text: `This is the body text of a card.  You can even use line\n  breaks and emoji! 💁`,
+  //   //     buttonText: 'This is a button',
+  //   //     buttonUrl: 'https://docs.dialogflow.com/'
+  //   //   })
+  //   // );
+  //   //   agent.add(new Suggestion(`Quick Reply`));
+  //   //   agent.add(new Suggestion(`Suggestion`));
+  //   //   agent.setContext({ name: 'weather', lifespan: 2, parameters: { city: 'Rome' }});
+  // }
+
+  // // Uncomment and edit to make your own Google Assistant intent handler
+  // // uncomment `intentMap.set('your intent name here', googleAssistantHandler);`
+  // // below to get this function to be run when a Dialogflow intent is matched
+  // function googleAssistantHandler(agent) {
+  //   let conv = agent.conv(); // Get Actions on Google library conv instance
+  //   conv.ask('Hello from the Actions on Google client library!') // Use Actions on Google library
+  //   agent.add(conv); // Add Actions on Google library responses to your agent's response
+  // }
+
+  // Run the proper function handler based on the Dialogflow action name
+  let actionMap = new Map();
+  // actionMap.set('Default Welcome Intent', welcome);
+  // actionMap.set('Default Fallback Intent', fallback);
+  actionMap.set('load_card', load_value);
+  //actionMap.set('Load Stored Value - yes', load_value);
+  // actionMap.set('check_card', check_cards);
+  // intentMap.set('<INTENT_NAME_HERE>', googleAssistantHandler);
+  agent.handleRequest(actionMap);
+};
