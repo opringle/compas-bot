@@ -1,10 +1,21 @@
-# sarcastibot
+# compas-bot
 
-- Code to build a virtual assistant, which can sarcastically perform tasks
-- Aim is to deploy in Google Assistant
+- Fullfillment code for compas card agent
+- Allows us to retrieve and send information to/from dialogueflow during a conversation.
 
-## Task 1
+### ToDo:
 
-- Order a pizza with dominos
+[ ] 
 
-## 
+
+
+
+
+
+
+
+
+
+
+
+
