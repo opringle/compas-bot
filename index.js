@@ -3,13 +3,15 @@
 
 'use strict';
 
-// Load webhookclient class:
+// Load webhookclient class from Dialogflow fullfillment modules:
 // https://github.com/dialogflow/dialogflow-fulfillment-nodejs/blob/master/docs/WebhookClient.md
-const { WebhookClient } = require('dialogflow-fulfillment');
-
 // Load Card and Suggestion class:
 // https://github.com/dialogflow/dialogflow-fulfillment-nodejs/blob/master/docs/Card.md
+const { WebhookClient } = require('dialogflow-fulfillment');
 const { Card, Suggestion } = require('dialogflow-fulfillment');
+const compass = require('./compass_modules/api_functions')
+
+
 
 process.env.DEBUG = 'dialogflow:debug'; // enables lib debugging statements
 
@@ -17,6 +19,8 @@ exports.CompasCard = (request, response) => {
 
   // Create a webhookclient class
   const agent = new WebhookClient({ request, response });
+
+  // Add dialogflow logs
   console.log('Dialogflow Request headers: ' + JSON.stringify(request.headers));
   console.log('Dialogflow Request body: ' + JSON.stringify(request.body));
 
@@ -32,6 +36,35 @@ exports.CompasCard = (request, response) => {
 
     // Reply to the user
     agent.add(amount + ` CAD has been added to card "` + card + `".`);
+  }
+
+  function log_in(agent) {
+
+    // Call CompasCard's API to log in the user and retrieve required information for the conversation
+    const user_info = compass.login("ojapringle@gmail.com", "myfakepassword");
+
+    // Retrive the user card names as lowercase
+    const cards = user_info['cards'];
+
+    // Upload them to the Dialogflow 'cards' entity
+    var options = {
+      host: url,
+      port: 80,
+      path: '/resource?id=foo&bar=baz',
+      method: 'POST'
+    };
+
+    http.request(options, function (res) {
+      console.log('STATUS: ' + res.statusCode);
+      console.log('HEADERS: ' + JSON.stringify(res.headers));
+      res.setEncoding('utf8');
+      res.on('data', function (chunk) {
+        console.log('BODY: ' + chunk);
+      });
+    }).end();
+
+    // Reply to the user
+    agent.add(`Welcome ${user_info['Contact information']['Name']}. You have been successfully logged in!`);
   }
 
 
@@ -77,6 +110,7 @@ exports.CompasCard = (request, response) => {
   // actionMap.set('Default Welcome Intent', welcome);
   // actionMap.set('Default Fallback Intent', fallback);
   actionMap.set('load_card', load_value);
+  actionMap.set('login', log_in);
   //actionMap.set('Load Stored Value - yes', load_value);
   // actionMap.set('check_card', check_cards);
   // intentMap.set('<INTENT_NAME_HERE>', googleAssistantHandler);
