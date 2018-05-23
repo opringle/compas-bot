@@ -23,7 +23,7 @@ exports.CompasCard = (request, response) => {
   console.log('Dialogflow Request headers: ' + JSON.stringify(request.headers));
   console.log('Dialogflow Request body: ' + JSON.stringify(request.body));
 
-  const allowed_top_up = [5, 10, 20, 40, 50, 100]
+  const allowed_top_up = [5, 10, 20, 40, 50, 100] // users can only top up these values
 
   // Call CompasCard's API to load funds for the user
   function load_value(agent) {
@@ -104,7 +104,7 @@ exports.CompasCard = (request, response) => {
         agent.setContext('load_stored_value_dialog_params_compasscard');  //We are still looking for a card
       }
       
-      // Attempt to fuzzy match the card with one of the cards on their account
+      // Attempt to fuzzy match the extracted card with one of the cards on their account
       else{
         var fm = new FuzzyMatching(userCards);
         const matchedCard = fm.get(extractedCard)['value']  //retrieve closest card to extracted value
@@ -124,27 +124,6 @@ exports.CompasCard = (request, response) => {
       }
     }
   }
-
-  // function choose_card(agent) {
-
-  //   // Update user context to logged in for 30 minutes and add user parameters
-  //   const context = { 'name': 'loadstoredvalue-followup', 'lifespan': 30, 'parameters': { 'card': cards } };
-  //   agent.setContext(context);
-  //   agent.add(`You are successfully logged in!`)
-  // }
-
-
-  // function welcome(agent) {
-  //   agent.add(`Welcome to my agent!`);
-  // }
-
-  // function load_existing_cards(agent) {
-  //   // Retrieve users card names from compas API and load them into Dialogflow user entity
-
-  //   // Get the users cards from compas API
-  //   const cards = ['oliver', 'steven'];
-
-  //   // Upload them to the user entity in Dialogflow
     
 
   //   // Reply with this message

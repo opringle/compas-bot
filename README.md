@@ -30,7 +30,7 @@ Hosting and deployment is setup with a google cloud project.
 - [x] agent.handleRequest() only takes intent handlers, not action handlers
 - [x] At login, call fake compass API, set output context to logged in with parameters for user info
 - [x] Reference user entities when loading card to verify card exists and there is a payment method
-- [ ] Load stored value follow up context does not work
+- [ ] Load stored value follow up context should be deleted after accepting or rejecting transaction
 
 - [ ] Bulk out with more definitions and smalltalk
 - [ ] Arrange meeting with translink to demo the agent
