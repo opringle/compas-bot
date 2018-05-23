@@ -1,25 +1,20 @@
-var http = require('http');
-var fs = require('fs');
+var express = require('express');
 
-// create a read stream from a txt file, encoded with utf8
-var myReadStream = fs.createReadStream(__dirname + '/readme.txt', 'utf8');
-
-// listen for event 'data' on the readstream
-myReadStream.on('data', function(chunk){
-    console.log('new chunk  recieved');
-    console.log(chunk);
-})
+var app  = express(); 
+app.set('view engine', 'ejs');
 
 
+app.get('/', function(req, res) {
+    res.sendFile(__dirname + '/index.html'); // express understands the head from what we send
+});
 
-// var server = http.createServer(function(req, resp){
-//     console.log('request was made: ' + req.url) // log information on our server
-//     resp.writeHead(200, {'Content-Type': 'text/plain'}); //Send back the header
-//     resp.end('Hey ninjas'); //Send back response body
-// });
+app.get('/contact', function (req, res) {
+    res.sendFile(__dirname + '/contact.html'); // express understands the head from what we send
+});
 
-// server.listen(3000, '127.0.0.1')
-// console.log('yo dawgs, now listening to port 3000!')
+app.get('/profile/:name', function(req, res){
+    var data = {age: 29, job: 'ninja', hobbies: ['eating', 'fighting', 'fishing']};
+    res.render('profile',  {person: req.params.name, data: data});
+});
 
-// // data flows into the buffer
-// // when the buffer reaches capacity it passes on a chunk of data as a stream
+app.listen(3000);

@@ -28,10 +28,10 @@ Hosting and deployment is setup with a google cloud project.
 - [x] Call a fake API with card and amount to upload with, respond to user
 - [x] Get running locally with ngrok
 - [x] agent.handleRequest() only takes intent handlers, not action handlers
-- [ ] Call fake API to log user in, loading their attributes into dialogflow entities
-    - Login intent expects entities to be filled with slot filling via the webhook
-    - Reference card parameters from previous contexts in the followup response (please choose from your cards X, Y and Z)
-    - 
-- [ ] Reference user entities when loading card to verify card exists and there is a payment method
+- [x] At login, call fake compass API, set output context to logged in with parameters for user info
+- [x] Reference user entities when loading card to verify card exists and there is a payment method
+- [ ] Load stored value follow up context does not work
+
 - [ ] Bulk out with more definitions and smalltalk
-- [ ] Arrange meeting with translink
+- [ ] Arrange meeting with translink to demo the agent
+- [ ] Run functions with nodemon to make it easy to edit and debug your code

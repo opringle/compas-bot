@@ -1,7 +1,7 @@
-module.exports.login = function (email_address, password) {
+module.exports.login = function () {
     return {
         "Contact information": {
-            "Name": "Mr Oliver Pringle",
+            "Name": "Ollie",
             "Mailing Address": "1990 Dunbar Street\\nApartment 201\\nVancouver, British Columbia\\nV6R 3M3",
             "Phone": 6044016325,
             "Email": "ojapringle@gmail.com"
