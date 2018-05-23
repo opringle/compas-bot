@@ -30,8 +30,10 @@ Hosting and deployment is setup with a google cloud project.
 - [x] agent.handleRequest() only takes intent handlers, not action handlers
 - [x] At login, call fake compass API, set output context to logged in with parameters for user info
 - [x] Reference user entities when loading card to verify card exists and there is a payment method
-- [ ] Load stored value follow up context should be deleted after accepting or rejecting transaction
 
+- [ ] Remove "Load stored value" context after accepting or rejecting transaction
+- [ ] Handle cases where the user tries to add value without being logged in
+- [ ] Try in Google assistant
 - [ ] Bulk out with more definitions and smalltalk
 - [ ] Arrange meeting with translink to demo the agent
 - [ ] Run functions with nodemon to make it easy to edit and debug your code
