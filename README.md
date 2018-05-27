@@ -10,12 +10,13 @@
 1. [Install the latest version of node.js](https://nodejs.org/en/)
 2. [Setup, install & authorize ngrok](https://dashboard.ngrok.com/get-started)
 3. From the root directory of this repo, install required node modules: `$ npm install`
-4. Deploy functions locally using google cloud functions emulator:
+4. Deploy functions locally using [google cloud functions emulator](https://cloud.google.com/functions/docs/emulator):
     - `$ gcloud functions list`
     - `$ functions config set projectId <project id>`
     - `$ functions start && functions deploy CompasCard --trigger-http`
+    - `$ functions inspect CompasCard`
 5. Point ngrok to where your functions are running: `$ ~/ngrok http 8010`
-6. In Dialogflow Fullfillment, set the URL: `<ngrok forwarding address>/compascard-cbc5b/us-central1/CompasCard`
+6. In the Dialogflow agent front end, set Fullfillment URL: `<ngrok forwarding address>/compascard-cbc5b/us-central1/CompasCard`
 7. You can now send messages in dialogflow, which will trigger your local fullfillments code
 
 ### On Google Cloud Platform
@@ -31,3 +32,4 @@ Hosting and deployment is setup with a google cloud project.
 - [ ] Run functions with nodemon to make it easy to edit and debug your code
 - [ ] Logged in parameters should be stored as user session parameters so we can clear loggin context
 - [ ] Bulk out with more definitions and smalltalk
+- [ ] Core modules should be a package which is installed into every business project 
