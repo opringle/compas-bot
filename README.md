@@ -33,3 +33,8 @@ Hosting and deployment is setup with a google cloud project.
 - [ ] Logged in parameters should be stored as user session parameters so we can clear loggin context
 - [ ] Bulk out with more definitions and smalltalk
 - [ ] Core modules should be a package which is installed into every business project 
+- [ ] Need to handle fallbacks depending on context.
+
+## Design Principles
+
+- Functions for performing various tasks like confirming intent execution are valuable to scalable design
