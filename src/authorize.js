@@ -7,7 +7,7 @@ module.exports.log_in = function(agent) {
     const user_info = compass_api.login();
 
     // Retrive user information for the rest of the conversation
-    const cards = [];// user_info['Cards'];
+    const cards = user_info['Cards'];
     const name = user_info['Contact information']['Name'];
 
     // Update user context to logged in for 30 minutes and add user parameters

@@ -27,9 +27,11 @@ module.exports.respond_to_execute_intent_question = function (agent, function_ha
     // If the user doesn't did not match any intent: leave context & response_followup
     // eg check_context(agent, 'loggedin', loggin, 'Ok. I won't log you in then.', 'Great, you're logged in.', Sorry 'I didn't get. Would you like to log in?'.)
     
-    const params = agent.getContext('answering_execute_intent')['parameters'];
+    const context = agent.getContext('answering_execute_intent');
 
-    if (params != null && agent.intent == 'Answering Yes'){
+
+    if (context != null && agent.intent == 'Answering Yes'){
+        params = context['parameters'];
         console.log(`User responded yes to intent execution: ${params['intent']}`);
 
         // let result = handler.get(params['intent'])(this);
@@ -42,16 +44,40 @@ module.exports.respond_to_execute_intent_question = function (agent, function_ha
         agent.add(params['response_yes']); // let the user know you are about to call the function
         agent.handleRequest(authorize.log_in); // call the function
     }
-    else {
+    else if (context != null && agent.intent == 'Answering No') {
+        params = context['parameters'];
         console.log(`User responded no to intent execution: ${params['intent']}`);
         agent.setContext({ name: 'answering_yes_no_function', lifespan: 0 }); // Clear the context
         agent.add(params['response_no']); //respond
     }
 }
 
-module.exports.fallback = function(agent){
-    console.log(`User did not match an intent with high confidence`);
-    // Checks the context
-    // Fails gracefully by extracting contexts
-    agent.add(`I'm sorry I don't understand.`);
+module.exports.fallback = function(agent, fallback_response){
+    // If user is responding to a yes no question, retrieve the context
+    const context = agent.getContext('answering_execute_intent');
+
+    if (context != null) {
+        params = context['parameters'];
+        console.log(`Low confidence from nlp during context 'answering_execute_intent'`);
+        agent.add(params['response_fallback']);
+    }
+    // Otherwise fail normally
+    else {
+
+        // Context tests
+
+        // Recieved in dialogflow, 
+        agent.setContext({ name: 'context1', lifespan: 1 }); // works and persists for <lifespan> user message(s)
+
+        // agent.setContext({ name: 'context1', lifespan: 0 }); // fails to modify context
+        // agent.clearContext('context1'); // successfully removes context1, set at the current point in the conversation
+        // agent.clearContext('loggedin'); // fails to remove incoming context
+        // agent.setContext({ name: 'loggedin', lifespan: 0 }); // fails to remove/modify incoming context, set previously in the conversation
+        agent.clearOutgoingContexts(); // successfully removes contextsset at the current point in the conversation, however, fails to remove any set previously
+
+        console.log(`Low confidence from nlp`);
+        let conv = agent.conv(); // Get Actions on Google library conv instance
+        conv.ask(fallback_response); // Ask the question on google assistant
+        agent.add(conv); // Add response to dialogflow object
+    }
 }

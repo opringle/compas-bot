@@ -23,26 +23,33 @@ exports.CompasCard = (request, response) => {
   // Create a webhookclient class
   const agent = new WebhookClient({ request, response });
 
-  // Set business parameters 
-  const allowed_top_up = [5, 10, 20, 40, 50, 100];
+  // Get Actions on Google library conv instance
+  let conv = agent.conv();
 
   // Log the incoming request from Dialogflow
   console.log('Dialogflow Request headers: ' + JSON.stringify(request.headers));
   console.log('Dialogflow Request body: ' + JSON.stringify(request.body));
 
-  // Make sure all callback functions only take agent as arg
-  const check_card = function (agent) { stored_value.check_card(agent, allowed_top_up);}
+  // Add arguments to callback functions
+  const check_card = function (agent) { stored_value.check_card(agent, [5, 10, 20, 40, 50, 100]);}
+  const fallback = function(agent){core.fallback(agent, `I'm sorry I don't understand.`)}
+  const respond_to_execute_intent_question = function (agent) { core.respond_to_execute_intent_question(agent, intentMap); }
+
+
+  function googleAssistantHandler(agent) {
+    let conv = agent.conv(); // Get Actions on Google library conv instance
+    conv.ask('Hello from the Actions on Google client library!') // Use Actions on Google library
+    agent.add(conv); // Add Actions on Google library responses to your agent's response
+  }
 
   // Define which functions are called for which intents
   let intentMap = new Map();
   intentMap.set('Log User In', login.log_in);
   intentMap.set('Load Stored Value', check_card);
   intentMap.set('Load Stored Value - yes', stored_value.load_value);
-  // Define core intents
-  const respond_to_execute_intent_question = function (agent) { core.respond_to_execute_intent_question(agent, intentMap); }
   intentMap.set('Answering Yes', respond_to_execute_intent_question);
   intentMap.set('Answering No', respond_to_execute_intent_question);
-  intentMap.set('Default Fallback Intent', core.fallback);
-
+  intentMap.set('Default Fallback Intent', fallback);
+  
   agent.handleRequest(intentMap);
 };

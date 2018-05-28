@@ -55,7 +55,7 @@ module.exports.check_card = function(agent, allowed_top_up) {
 
         // If the user has no cards, fail gracefully
         else if (userCards.length === 0) {
-            agent.add(`I'm sorry ${parameters['name']}. I wasn't able to find a Compass card on your account :(`);
+            agent.add(`I'm sorry ${parameters['name']}. I wasn't able to find a Compass card on your account.`);
             // Set dialog context lifetime to zero
             agent.setContext({ name: 'load_stored_value_dialog_context', lifespan: 0 });
         }
