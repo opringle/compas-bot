@@ -1,5 +1,5 @@
 core = require('./core');
-authorize = require('./authorize');
+const FuzzyMatching = require('fuzzy-matching');
 
 module.exports.load_value = function(agent) {
     console.log(`User requested to load stored value to their compass card`);
@@ -11,9 +11,8 @@ module.exports.load_value = function(agent) {
 
     // Call Translink API to execute the transaction
 
-    // Reply to the user
-    agent.clearContext('loadstoredvalue-followup');
-    agent.add(amount + ` CAD has been added to card "` + card + `".`);
+    agent.add(amount + ` CAD has been added to card "` + card + `".`); // Reply to the user
+    agent.setContext({ name: 'loadstoredvalue-followup', lifespan: -1 }); // Clear the context
 }
 
 module.exports.check_card = function(agent, allowed_top_up) {

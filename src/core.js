@@ -1,4 +1,25 @@
-authorize = require('./authorize');
+const compass_api = require('../compass_modules/compass_api');
+
+module.exports.log_in = function (agent) {
+    console.log(`User requested to log in`);
+
+    // Call CompasCard's API to log in the user and retrieve required information for the conversation
+    const user_info = compass_api.login();
+
+    // Retrive user information for the rest of the conversation
+    const cards = user_info['Cards'];
+    const name = user_info['Contact information']['Name'];
+
+    // Update user context to logged in for 30 minutes and add user parameters
+    const context = { 'name': 'loggedin', 'lifespan': 30, 'parameters': { 'user_cards': cards, 'name': name } };
+    agent.setContext(context);
+
+    // Add the response
+    // let conv = agent.conv();
+    // conv.ask(`Hi ${name}. Looks like you are successfully logged in!`);
+    // agent.add(conv);
+    agent.add(`Hi ${name}. Looks like you are successfully logged in!`);
+}
 
 module.exports.ask_to_execute_intent = function(agent, intent, question, response_no, response_yes, response_fallback){
     // Agent asks user if they would like to execute the intent
@@ -6,7 +27,13 @@ module.exports.ask_to_execute_intent = function(agent, intent, question, respons
     // Clears any other contexts for the current dialog
     console.log(`Asking user if they want to execute functionality for intent '${intent}'`);
 
-    agent.add(question); // ask the user if they want to execute the function
+    // ask the user if they want to execute the function
+    // let conv = agent.conv();
+    // conv.ask(question);
+    // agent.add(conv);
+    agent.add(question);
+
+    // store context parameters for use in next response
     const context = { 
         'name': 'answering_execute_intent', 
         'lifespan': 1, 
@@ -17,7 +44,7 @@ module.exports.ask_to_execute_intent = function(agent, intent, question, respons
             'response_fallback': response_fallback
         }
     };
-    agent.setContext(context); // store context parameters for use in next response
+    agent.setContext(context);
     // agent.clearContext() //ToDo: Get this working
 }
 
@@ -29,26 +56,33 @@ module.exports.respond_to_execute_intent_question = function (agent, function_ha
     
     const context = agent.getContext('answering_execute_intent');
 
-
     if (context != null && agent.intent == 'Answering Yes'){
         params = context['parameters'];
         console.log(`User responded yes to intent execution: ${params['intent']}`);
 
-        // let result = handler.get(params['intent'])(this);
-        // let promise = Promise.resolve(result);
-        // // retrieve the function ToDo: This is broken
-        // const f = function_handler.get(params['intent']);
-        // let f_promise = Promise.resolve(f);
+        // let the user know you are about to call the function
+        // let conv = agent.conv();
+        // conv.ask(params['response_yes']);
+        // agent.add(conv);
+        agent.add(params['response_yes']);
 
-        agent.setContext({ name: 'answering_yes_no_function', lifespan: 0}); // Clear the context
-        agent.add(params['response_yes']); // let the user know you are about to call the function
-        agent.handleRequest(authorize.log_in); // call the function
+        agent.setContext({ name: 'answering_execute_intent', lifespan: -1 }); // Clear the context
+        agent.intent = 'Log User In';
+        agent.handleRequest(function_handler); // Call the user intention
+        
     }
     else if (context != null && agent.intent == 'Answering No') {
         params = context['parameters'];
         console.log(`User responded no to intent execution: ${params['intent']}`);
-        agent.setContext({ name: 'answering_yes_no_function', lifespan: 0 }); // Clear the context
-        agent.add(params['response_no']); //respond
+
+        // Let the user know you will not call the function
+        // let conv = agent.conv();
+        // conv.ask(params['response_no']);
+        // agent.add(conv);
+        agent.add(params['response_no']);
+
+        agent.setContext({ name: 'answering_execute_intent', lifespan: -1 }); // Clear the context
+
     }
 }
 
@@ -59,25 +93,23 @@ module.exports.fallback = function(agent, fallback_response){
     if (context != null) {
         params = context['parameters'];
         console.log(`Low confidence from nlp during context 'answering_execute_intent'`);
+
+        // Contextually respond to the user
+        // let conv = agent.conv();
+        // conv.ask(params['response_fallback']);
+        // agent.add(conv);
         agent.add(params['response_fallback']);
+
+        // Clear the context
+        agent.setContext({ name: 'answering_execute_intent', lifespan: -1 }); // Clear the context
     }
     // Otherwise fail normally
     else {
 
-        // Context tests
-
-        // Recieved in dialogflow, 
-        agent.setContext({ name: 'context1', lifespan: 1 }); // works and persists for <lifespan> user message(s)
-
-        // agent.setContext({ name: 'context1', lifespan: 0 }); // fails to modify context
-        // agent.clearContext('context1'); // successfully removes context1, set at the current point in the conversation
-        // agent.clearContext('loggedin'); // fails to remove incoming context
-        // agent.setContext({ name: 'loggedin', lifespan: 0 }); // fails to remove/modify incoming context, set previously in the conversation
-        agent.clearOutgoingContexts(); // successfully removes contextsset at the current point in the conversation, however, fails to remove any set previously
-
         console.log(`Low confidence from nlp`);
-        let conv = agent.conv(); // Get Actions on Google library conv instance
-        conv.ask(fallback_response); // Ask the question on google assistant
-        agent.add(conv); // Add response to dialogflow object
+        // let conv = agent.conv();
+        // conv.ask(fallback_response); // Ask the question on google assistant
+        // agent.add(conv); // Add response to dialogflow object
+        agent.add(fallback_response);
     }
 }

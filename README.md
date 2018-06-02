@@ -11,9 +11,9 @@
 2. [Setup, install & authorize ngrok](https://dashboard.ngrok.com/get-started)
 3. From the root directory of this repo, install required node modules: `$ npm install`
 4. Deploy functions locally using [google cloud functions emulator](https://cloud.google.com/functions/docs/emulator):
-    - `$ gcloud functions list`
+    - `$ functions list`
     - `$ functions config set projectId <project id>`
-    - `$ functions start && functions deploy CompasCard --trigger-http`
+    - `$ gcloud beta functions deploy CompasCard --trigger-http`
     - `$ functions inspect CompasCard`
 5. Point ngrok to where your functions are running: `$ ~/ngrok http 8010`
 6. In the Dialogflow agent front end, set Fullfillment URL: `<ngrok forwarding address>/compascard-cbc5b/us-central1/CompasCard`

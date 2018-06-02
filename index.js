@@ -11,8 +11,8 @@
 
 const { WebhookClient } = require('dialogflow-fulfillment');
 const { Card, Suggestion } = require('dialogflow-fulfillment');
-const FuzzyMatching = require('fuzzy-matching');
-const login = require('./src/authorize');
+const { Carousel } = require('actions-on-google');
+
 const stored_value = require('./src/stored_value');
 const core = require('./src/core')
 
@@ -23,9 +23,6 @@ exports.CompasCard = (request, response) => {
   // Create a webhookclient class
   const agent = new WebhookClient({ request, response });
 
-  // Get Actions on Google library conv instance
-  let conv = agent.conv();
-
   // Log the incoming request from Dialogflow
   console.log('Dialogflow Request headers: ' + JSON.stringify(request.headers));
   console.log('Dialogflow Request body: ' + JSON.stringify(request.body));
@@ -35,16 +32,9 @@ exports.CompasCard = (request, response) => {
   const fallback = function(agent){core.fallback(agent, `I'm sorry I don't understand.`)}
   const respond_to_execute_intent_question = function (agent) { core.respond_to_execute_intent_question(agent, intentMap); }
 
-
-  function googleAssistantHandler(agent) {
-    let conv = agent.conv(); // Get Actions on Google library conv instance
-    conv.ask('Hello from the Actions on Google client library!') // Use Actions on Google library
-    agent.add(conv); // Add Actions on Google library responses to your agent's response
-  }
-
   // Define which functions are called for which intents
   let intentMap = new Map();
-  intentMap.set('Log User In', login.log_in);
+  intentMap.set('Log User In', core.log_in);
   intentMap.set('Load Stored Value', check_card);
   intentMap.set('Load Stored Value - yes', stored_value.load_value);
   intentMap.set('Answering Yes', respond_to_execute_intent_question);
