@@ -1,7 +1,42 @@
 const compass_api = require('../compass_modules/compass_api');
 
+
+module.exports.context_reducer = function(agent){
+    // Reduce the counter for all contexts by 1
+    const contexts = agent.contexts;
+    if (contexts != null) {
+        contexts.forEach(element => {
+            var context_name = element['name'];
+            var context = agent.getContext(context_name);
+            var current_lifespan = context['lifespan'];
+            agent.add(`The current life span of context ${element} is ${current_lifespan}`)
+            agent.setContext({ name: context_name, lifespan: current_lifespan - 1 }); // Clear the context
+        });
+    }
+}
+
+module.exports.clear_incoming_contexts = function (agent, exclude) {
+    // Clears all incoming contexts
+    console.log(`Clearing all incoming contexts EXCLUDING: ${exclude}`);
+
+    const contexts = agent.contexts;
+    if (contexts != null) {
+        contexts.forEach(element => {
+            var context_name = element['name']
+            if (exclude.indexOf(context_name) > -1) {
+                //In the array!
+            }
+            else {
+                agent.setContext({ name: context_name, lifespan: -1 }); // Clear the context
+            }
+        });
+    }
+}
+
 module.exports.log_in = function (agent) {
     console.log(`User requested to log in`);
+
+    module.exports.clear_incoming_contexts(agent, []); // loose any dangling contexts
 
     // Call CompasCard's API to log in the user and retrieve required information for the conversation
     const user_info = compass_api.login();
@@ -36,7 +71,7 @@ module.exports.ask_to_execute_intent = function(agent, intent, question, respons
     // store context parameters for use in next response
     const context = { 
         'name': 'answering_execute_intent', 
-        'lifespan': 1, 
+        'lifespan': 2, 
         'parameters': {
             'intent': `${intent}`, 
             'response_no': response_no, 
@@ -99,14 +134,12 @@ module.exports.fallback = function(agent, fallback_response){
         // conv.ask(params['response_fallback']);
         // agent.add(conv);
         agent.add(params['response_fallback']);
-
-        // Clear the context
-        agent.setContext({ name: 'answering_execute_intent', lifespan: -1 }); // Clear the context
     }
     // Otherwise fail normally
     else {
-
         console.log(`Low confidence from nlp`);
+        module.exports.clear_incoming_contexts(agent, ['loggedin']);
+
         // let conv = agent.conv();
         // conv.ask(fallback_response); // Ask the question on google assistant
         // agent.add(conv); // Add response to dialogflow object
